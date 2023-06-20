@@ -4,6 +4,18 @@ namespace Parser;
 
 public class Analysis
 {
+    public class TokenInfo
+    {
+        private Token Token { get; }
+        private string FilePath { get; }
+
+        public TokenInfo(Token token, string filePath)
+        {
+            Token = token;
+            FilePath = filePath;
+        }
+    }
+
     public Dictionary<uint, Dictionary<string, List<Token>>> LevelMap { get; } = new();
 
     public Analysis()
