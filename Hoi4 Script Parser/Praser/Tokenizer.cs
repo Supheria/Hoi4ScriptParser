@@ -170,7 +170,8 @@ internal class Tokenizer
     private void CacheList()
     {
         var token = Tree.OnceGet();
-        if (token is NullToken) { return; }
+        if (token is NullToken)
+            return;
         Tokens.Add(token);
     }
 
@@ -185,14 +186,14 @@ internal class Tokenizer
     }
     private void EndCheck()
     {
-        if (Tree.From != null)
+        if (Tree.From is not null)
         {
             Exceptions.Exception($"interruption at line({Line}), column({Column})");
-            Tree.From.Append(Tree.OnceGet());
+            Tree.Done();
             Tree = Tree.From;
-            while (Tree.From != null)
+            while (Tree.From is not null)
             {
-                Tree.From.Append(Tree.OnceGet());
+                Tree.Done();
                 Tree = Tree.From;
             }
         }

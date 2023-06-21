@@ -32,7 +32,6 @@ internal class ParseTree
     private Token Builder { get; set; } = new NullToken();
     public ParseTree? From { get; init; }
     private uint Level { get; }
-    private bool OwnBuilder { get; set; } = true;
 
     public ParseTree()
     {
@@ -51,20 +50,21 @@ internal class ParseTree
 
     public Token OnceGet()
     {
-        if (OwnBuilder)
-        {
-            OwnBuilder = false;
+        if (Builder is NullToken)
             return Builder;
-        }
-        else
-            return new NullToken();
+        var builder = Builder;
+        Builder = new NullToken();
+        return builder;
     }
-    private void Done()
+    public void Done()
     {
-        From?.Append(Builder);
+        if (From is null)
+            return;
+        From.Append(Builder);
+        Builder = new NullToken();
     }
 
-    public void Append(Token token)
+    private void Append(Token token)
     {
         (Builder as Scope)?.Append(token);
     }
