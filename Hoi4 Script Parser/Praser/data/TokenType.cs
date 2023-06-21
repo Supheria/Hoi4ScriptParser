@@ -2,93 +2,38 @@
 
 namespace Parser.data;
 
+public class NullToken : Token
+{
+    public NullToken()
+        : base(new(), 0)
+    {
+    }
+}
+
 public class Token
 {
-    public string Name { get; init; }
+    public Word Name { get; init; }
     public uint Level { get; init; }
-    public Token(string name, uint level)
+    public Token(Word name, uint level)
     {
         Name = name;
         Level = level;
     }
-}
-
-public class NullToken : Token
-{
-    public NullToken() : base("", 0)
-    {
-    }
-}
-
-public class TaggedValue : Token
-{
-    public string Operator { get; init; }
-    public string Tag { get; init; }
-    public List<string> Value { get; private set; }
-    public TaggedValue(string name, uint level, string @operator, string tag) : base(name, level)
-    {
-        Operator = @operator;
-        Tag = tag;
-        Value = new();
-    }
-    public void Append(string value)
-    {
-        Value.Add(value);
-    }
 
     public override string ToString()
     {
-        var sb = new StringBuilder();
-        _ = sb.Append($"{Tag}(...) ");
-        foreach (var value in Value)
-            _ = sb.Append($"{value} ");
+        return Name.ToString();
+    }
 
-        return sb.ToString();
-    }
-}
-
-public class ValueArray : Token
-{
-    public List<List<string>> Value { get; private set; }
-    public ValueArray(string name, uint level) : base(name, level)
-    {
-        Value = new();
-    }
-    public void Append(string value)
-    {
-        Value.LastOrDefault()?.Add(value);
-    }
-    public void AppendNew(string value)
-    {
-        Value.Add(new() { value });
-    }
-}
-
-public class TagArray : Token
-{
-    public List<List<KeyValuePair<string, List<string>>>> Value { get; private set; }
-    public TagArray(string name, uint level) : base(name, level)
-    {
-        Value = new();
-    }
-    public void Append(string value)
-    {
-        Value.LastOrDefault()?.LastOrDefault().Value.Add(value);
-    }
-    public void AppendTag(string value)
-    {
-        Value.LastOrDefault()?.Add(new(value, new()));
-    }
-    public void AppendNew(string value)
-    {
-        Value.Add(new() { new(value, new()) });
-    }
+    public uint Line => Name.Line;
+    public uint Column => Name.Column;
 }
 
 public class Scope : Token
 {
-    public List<Token> Property { get; private set; }
-    public Scope(string name, uint level) : base(name, level)
+    public List<Token> Property { get; }
+    public Scope(Word name, uint level)
+        : base(name, level)
     {
         Property = new();
     }
@@ -102,5 +47,101 @@ public class Scope : Token
             return;
         }
         Property.Add(property);
+    }
+}
+
+public class TaggedValue : Token
+{
+    public Word Operator { get; init; }
+    public Word Tag { get; init; }
+    public List<Word> Value { get; }
+    public TaggedValue(Word name, uint level, Word @operator, Word tag)
+        : base(name, level)
+    {
+        Operator = @operator;
+        Tag = tag;
+        Value = new();
+    }
+    public void Append(Word value)
+    {
+        Value.Add(value);
+    }
+    public new string ToString()
+    {
+        var sb = new StringBuilder();
+        _ = sb.Append($"{Tag}[");
+        foreach (var value in Value)
+            _ = sb.Append($"{value} ");
+        _ = sb.Append(']');
+        return sb.ToString();
+    }
+}
+
+public class ValueArray : Token
+{
+    public List<List<Word>> Value { get; }
+    public ValueArray(Word name, uint level) 
+        : base(name, level)
+    {
+        Value = new();
+    }
+    public void Append(Word value)
+    {
+        Value.LastOrDefault()?.Add(value);
+    }
+    public void AppendNew(Word value)
+    {
+        Value.Add(new() { value });
+    }
+    public new string ToString()
+    {
+        var sb = new StringBuilder();
+        foreach (var value in Value)
+        {
+            _ = sb.Append('(');
+            foreach (var element in value)
+                _ = sb.Append($"{element} ");
+            _ = sb.Append(") ");
+        }
+        return sb.ToString();
+    }
+}
+
+public class TagArray : Token
+{
+    public List<List<KeyValuePair<Word, List<Word>>>> Value { get; }
+    public TagArray(Word name, uint level)
+        : base(name, level)
+    {
+        Value = new();
+    }
+    public void Append(Word value)
+    {
+        Value.LastOrDefault()?.LastOrDefault().Value.Add(value);
+    }
+    public void AppendTag(Word value)
+    {
+        Value.LastOrDefault()?.Add(new(value, new()));
+    }
+    public void AppendNew(Word value)
+    {
+        Value.Add(new() { new(value, new()) });
+    }
+    public new string ToString()
+    {
+        var sb = new StringBuilder();
+        foreach (var value in Value)
+        {
+            sb.Append('(');
+            foreach (var pair in value)
+            {
+                _ = sb.Append($"{pair.Key}[");
+                foreach (var element in pair.Value)
+                    _ = sb.Append($"{element} ");
+                _ = sb.Append("] ");
+            }
+            sb.Append(") ");
+        }
+        return sb.ToString();
     }
 }

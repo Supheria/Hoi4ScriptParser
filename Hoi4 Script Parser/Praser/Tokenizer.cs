@@ -75,7 +75,7 @@ internal class Tokenizer
     }
     private bool Compose(char ch)
     {
-        if (Composed?.OwnValue == true) { return true; }
+        if (Composed.Submitted == false) { return true; }
         switch (State)
         {
             case States.Quotation:
@@ -156,10 +156,6 @@ internal class Tokenizer
                         Line++;
                         Column = 0;
                     }
-                    else if (ch == '\t')
-                    {
-                        Column += 3;
-                    }
                     GetChar();
                 }
                 else
@@ -181,12 +177,15 @@ internal class Tokenizer
     private char GetChar()
     {
         var ch = (char)Buffer[BufferPosition++];
-        Column++;
+        if (ch == '\t')
+            Column += 4;
+        else
+            Column++;
         return ch;
     }
     private void EndCheck()
     {
-        if (Tree?.From != null)
+        if (Tree.From != null)
         {
             Exceptions.Exception($"interruption at line({Line}), column({Column})");
             Tree.From.Append(Tree.OnceGet());

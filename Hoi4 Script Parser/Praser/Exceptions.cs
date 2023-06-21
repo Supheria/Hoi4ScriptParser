@@ -18,13 +18,27 @@ internal class Exceptions
 
     private static string _logPath = "";
 
+    internal static string FilePath
+    {
+        get => _filePath;
+        set
+        {
+            if (value == _filePath)
+                return;
+            _filePath = value;
+            NewFilePath = true;
+        }
+    }
+    private static string _filePath = "";
+    private static bool NewFilePath { get; set; } = true;
+
     internal static void UnknownError(Element element)
     {
         Append($"unknown error at line({element.Line}), column({element.Column})");
     }
-    internal static void UnexpectedKey(Element element)
+    internal static void UnexpectedName(Element element)
     {
-        Append($"unexpected key at line({element.Line}), column({element.Column})");
+        Append($"unexpected name at line({element.Line}), column({element.Column})");
     }
     internal static void UnexpectedOperator(Element element)
     {
@@ -53,6 +67,11 @@ internal class Exceptions
             return;
         using var file = new FileStream(LogPath, FileMode.Append);
         using var logger = new StreamWriter(file);
-        logger.WriteLine(message);
+        if (NewFilePath)
+        {
+            logger.WriteLine(FilePath);
+            NewFilePath = false;
+        }
+        logger.WriteLine($"\t{message}");
     }
 }

@@ -2,32 +2,32 @@
 
 internal class Element
 {
-    private string Value { get; }
-    public bool OwnValue { get; private set; }
+    private string Text { get; }
+    public bool Submitted { get; private set; }
     public uint Line { get; private set; }
     public uint Column { get; private set; }
 
     public Element()
     {
-        OwnValue = false;
-        Value = "";
+        Submitted = true;
+        Text = "";
         Line = 0;
         Column = 0;
     }
-    public Element(string value, uint line, uint column)
+    public Element(string text, uint line, uint column)
     {
-        OwnValue = true;
-        Value = value;
+        Submitted = false;
+        Text = text;
         Line = line;
         Column = column;
     }
     public char Head()
     {
-        return Value.FirstOrDefault();
+        return Text.FirstOrDefault();
     }
-    public string GetValue()
+    public Word Get()
     {
-        OwnValue = false;
-        return Value;
+        Submitted = true;
+        return new(Text, Line, Column);
     }
 }
