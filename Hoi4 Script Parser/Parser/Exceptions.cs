@@ -1,5 +1,5 @@
-﻿using System.Text;
-using Parser.Data;
+﻿using Parser.Data;
+using System.Text;
 
 namespace Parser;
 
