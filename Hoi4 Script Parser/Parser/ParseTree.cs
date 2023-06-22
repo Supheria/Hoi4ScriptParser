@@ -1,4 +1,5 @@
-﻿using Parser.data;
+﻿using Parser.Data;
+using Parser.Data.TokenTypes;
 
 namespace Parser;
 
@@ -16,23 +17,30 @@ internal class ParseTree
     private enum Steps
     {
         None = 0,
-        Name = 0b1,
-        Operator = 0b1 << 1,
-        Value = 0b1 << 2,
-        Tag = 0b1 << 3,
-        Array = 0b1 << 4,
-        Sub = 0b1 << 5,
-        On = 0b1 << 6,
-        Off = 0b1 << 7
+        Name = 1,
+        Operator = 1 << 1,
+        Value = 1 << 2,
+        Tag = 1 << 3,
+        Array = 1 << 4,
+        Sub = 1 << 5,
+        On = 1 << 6,
+        Off = 1 << 7
     }
 
     private Steps Step { get; set; } = Steps.None;
+
     private Word Name { get; set; } = new();
+
     private Word Operator { get; set; } = new();
+
     private Word Value { get; set; } = new();
+
     private Word Array { get; set; } = new();
+
     private Token Builder { get; set; } = new NullToken();
-    public ParseTree? From { get; init; }
+
+    public ParseTree? From { get; }
+
     private uint Level { get; }
 
     public ParseTree(Exceptions exceptions)
@@ -60,6 +68,7 @@ internal class ParseTree
         Builder = new NullToken();
         return builder;
     }
+
     public void Done()
     {
         if (From is null)
@@ -76,22 +85,22 @@ internal class ParseTree
     public ParseTree? Parse(Element element)
     {
         var ch = element.Head();
-        if ((Step & Steps.Sub) > 0)
+        if (Step.HasFlag(Steps.Sub))
         {
-            return Parse_Sub(element);
+            return ParseSub(element);
         }
-        else if ((Step & Steps.Array) > 0)
+        else if (Step.HasFlag(Steps.Array))
         {
-            return Parse_Array(element);
+            return ParseArray(element);
         }
-        else if ((Step & Steps.Operator) > 0)
+        else if (Step.HasFlag(Steps.Operator))
         {
-            return Parse_Operator(element);
+            return ParseOperator(element);
         }
         //
         // 1
         //
-        else if ((Step & Steps.Name) > 0)
+        else if (Step.HasFlag(Steps.Name))
         {
             switch (ch)
             {
@@ -110,7 +119,7 @@ internal class ParseTree
         //
         // 3
         //
-        else if ((Step & Steps.Value) > 0)
+        else if (Step.HasFlag(Steps.Value))
         {
             switch (ch)
             {
@@ -127,7 +136,7 @@ internal class ParseTree
         //
         // 4
         //
-        else if ((Step & Steps.Tag) > 0)
+        else if (Step.HasFlag(Steps.Tag))
         {
             switch (ch)
             {
@@ -170,13 +179,14 @@ internal class ParseTree
             }
         }
     }
-    public ParseTree? Parse_Sub(Element element)
+
+    public ParseTree? ParseSub(Element element)
     {
         var ch = element.Head();
         //
         // 6
         //
-        if ((Step & Steps.Name) > 0)
+        if (Step.HasFlag(Steps.Name))
         {
             switch (ch)
             {
@@ -185,7 +195,7 @@ internal class ParseTree
                     element.Get();
                     return From;
                 case CloseBrace:
-                    ((Scope)Builder).Append(new Token(Value, Level + 1), _exceptions.ErrorString);
+                    ((Scope)Builder).Append(new(Value, Level + 1), _exceptions.ErrorString);
                     element.Get();
                     Done();
                     return From;
@@ -193,9 +203,9 @@ internal class ParseTree
                 case Greater:
                 case Less:
                     Step = Steps.Sub;
-                    return new ParseTree(this, Level + 1, Value, element.Get(), _exceptions);
+                    return new(this, Level + 1, Value, element.Get(), _exceptions);
                 default:
-                    ((Scope)Builder).Append(new Token(Value, Level + 1), _exceptions.ErrorString);
+                    ((Scope)Builder).Append(new(Value, Level + 1), _exceptions.ErrorString);
                     Value = element.Get();
                     return this;
             }
@@ -222,21 +232,22 @@ internal class ParseTree
             }
         }
     }
-    public ParseTree? Parse_Array(Element element)
+
+    public ParseTree? ParseArray(Element element)
     {
         var ch = element.Head();
-        if ((Step & Steps.Tag) > 0)
+        if (Step.HasFlag(Steps.Tag))
         {
-            return Parse_Tag_Array(element);
+            return ParseTagArray(element);
         }
-        else if ((Step & Steps.Value) > 0)
+        else if (Step.HasFlag(Steps.Value))
         {
-            return Parse_Value_Array(element);
+            return ParseValueArray(element);
         }
         //
         // 9
         //
-        else if ((Step & Steps.Off) > 0)
+        else if (Step.HasFlag(Steps.Off))
         {
             switch (ch)
             {
@@ -257,7 +268,7 @@ internal class ParseTree
         //
         // 10
         //
-        else if ((Step & Steps.Name) > 0)
+        else if (Step.HasFlag(Steps.Name))
         {
             switch (ch)
             {
@@ -315,15 +326,16 @@ internal class ParseTree
             }
         }
     }
-    public ParseTree? Parse_Tag_Array(Element element)
+
+    public ParseTree? ParseTagArray(Element element)
     {
         var ch = element.Head();
-        if ((Step & Steps.Value) > 0)
+        if (Step.HasFlag(Steps.Value))
         {
             //
             // 17
             //
-            if ((Step & Steps.Off) > 0)
+            if (Step.HasFlag(Steps.Off))
             {
                 switch (ch)
                 {
@@ -372,7 +384,7 @@ internal class ParseTree
         //
         // 18
         //
-        else if ((Step & Steps.Off) > 0)
+        else if (Step.HasFlag(Steps.Off))
         {
             switch (ch)
             {
@@ -393,7 +405,7 @@ internal class ParseTree
         //
         // 19
         //
-        else if ((Step & Steps.On) > 0)
+        else if (Step.HasFlag(Steps.On))
         {
             switch (ch)
             {
@@ -417,7 +429,7 @@ internal class ParseTree
         //
         // 20
         //
-        else if ((Step & Steps.Name) > 0)
+        else if (Step.HasFlag(Steps.Name))
         {
             switch (ch)
             {
@@ -454,13 +466,14 @@ internal class ParseTree
             }
         }
     }
-    public ParseTree? Parse_Value_Array(Element element)
+
+    public ParseTree? ParseValueArray(Element element)
     {
         var ch = element.Head();
         //
         // 12
         //
-        if ((Step & Steps.Off) > 0)
+        if (Step.HasFlag(Steps.Off))
         {
             switch (ch)
             {
@@ -481,7 +494,7 @@ internal class ParseTree
         //
         // 13
         //
-        else if ((Step & Steps.On) > 0)
+        else if (Step.HasFlag(Steps.On))
         {
             switch (ch)
             {
@@ -505,7 +518,7 @@ internal class ParseTree
         //
         // 14
         //
-        else if ((Step & Steps.Name) > 0)
+        else if (Step.HasFlag(Steps.Name))
         {
             switch (ch)
             {
@@ -550,13 +563,14 @@ internal class ParseTree
             }
         }
     }
-    public ParseTree? Parse_Operator(Element element)
+
+    public ParseTree? ParseOperator(Element element)
     {
         var ch = element.Head();
         //
         // 5
         //
-        if ((Step & Steps.On) > 0)
+        if (Step.HasFlag(Steps.On))
         {
             switch (ch)
             {

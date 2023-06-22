@@ -1,11 +1,11 @@
-﻿using System.Text;
-using Parser.data;
+﻿using Parser.Data.TokenTypes;
 
-namespace Parser.helper;
+namespace Parser.Helper;
 
 public class TokenInfo
 {
     public Token Token { get; init; }
+
     public string FilePath { get; init; }
 
     public TokenInfo(Token token, string filePath)
@@ -14,9 +14,11 @@ public class TokenInfo
         FilePath = filePath;
     }
 
-    public string Name => Token.ToString();
+    public string Name => Token.Name.Text;
+
     public uint Level => Token.Level;
 
     public uint Line => Token.Line;
+
     public uint Column => Token.Column;
 }

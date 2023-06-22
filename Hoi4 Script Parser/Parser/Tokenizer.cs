@@ -1,15 +1,15 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Parser.data;
-using System.Text;
+﻿using System.Text;
+using Parser.Data;
+using Parser.Data.TokenTypes;
 
 namespace Parser;
 
 internal class Tokenizer
 {
-    private static readonly List<char> Delimiter = new() { '\t', ' ', '\n', '\r', '#', '=', '>', '<', '}', '{', '"', '\0' };
-    private static readonly List<char> Blank = new() { '\t', ' ', '\n', '\r', '\0' };
-    private static readonly List<char> EndLine = new() { '\n', '\r', '\0' };
-    private static readonly List<char> Marker = new() { '=', '>', '<', '}', '{' };
+    private static readonly char[] Delimiter = { '\t', ' ', '\n', '\r', '#', '=', '>', '<', '}', '{', '"', '\0' };
+    private static readonly char[] Blank = { '\t', ' ', '\n', '\r', '\0' };
+    private static readonly char[] EndLine = { '\n', '\r', '\0' };
+    private static readonly char[] Marker = { '=', '>', '<', '}', '{' };
     private const char Note = '#';
     private const char Quote = '"';
     private const char Escape = '\\';
@@ -25,25 +25,33 @@ internal class Tokenizer
     }
 
     private States State { get; set; } = States.None;
+
     private byte[] Buffer { get; set; } = Array.Empty<byte>();
-    private uint BufferPosition { get; set; } = 0;
+
+    private uint BufferPosition { get; set; }
+
     private uint Line { get; set; } = 1;
-    private uint Column { get; set; } = 0;
+
+    private uint Column { get; set; }
+
     private ParseTree Tree { get; set; }
+
     private Element Composed { get; set; } = new();
+
     private StringBuilder Composing { get; } = new();
+
     private List<Token> Tokens { get; } = new();
 
     public Tokenizer(Exceptions exceptions)
     {
         _exceptions = exceptions;
-        Tree = new ParseTree(_exceptions);
+        Tree = new(_exceptions);
     }
 
     private List<Token> Parse(string filePath)
     {
         ReadBuffer(filePath);
-        Tree = new ParseTree(_exceptions);
+        Tree = new(_exceptions);
         while (BufferPosition < Buffer?.Length)
         {
             if (!Compose((char)Buffer[BufferPosition]))
@@ -52,7 +60,7 @@ internal class Tokenizer
             if (tree is null)
             {
                 CacheList();
-                Tree = new ParseTree(_exceptions);
+                Tree = new(_exceptions);
             }
             else { Tree = tree; }
         }
@@ -93,25 +101,22 @@ internal class Tokenizer
         switch (State)
         {
             case States.Quotation:
-                if (ch == Escape)
+                switch (ch)
                 {
-                    Composing.Append(GetChar());
-                    State = States.Escape;
-                    return false;
-                }
-                else if (ch == Quote)
-                {
-                    Composing.Append(GetChar());
-                    Composed = new(Composing.ToString(), Line, Column);
-                    State = States.None;
-                    return true;
-                }
-                else if (EndLine.Contains(ch))
-                {
-                    Composing.Append(Quote);
-                    Composed = new(Composing.ToString(), Line, Column);
-                    State = States.None;
-                    return true;
+                    case Escape:
+                        Composing.Append(GetChar());
+                        State = States.Escape;
+                        return false;
+                    case Quote:
+                        Composing.Append(GetChar());
+                        Composed = new(Composing.ToString(), Line, Column);
+                        State = States.None;
+                        return true;
+                    case { } when EndLine.Contains(ch):
+                        Composing.Append(Quote);
+                        Composed = new(Composing.ToString(), Line, Column);
+                        State = States.None;
+                        return true;
                 }
                 Composing.Append(GetChar());
                 return false;
@@ -147,36 +152,34 @@ internal class Tokenizer
                 GetChar();
                 return false;
             default:
-                if (ch == Quote)
+                switch (ch)
                 {
-                    Composing.Clear();
-                    Composing.Append(GetChar());
-                    State = States.Quotation;
-                }
-                else if (ch == Note)
-                {
-                    State = States.Note;
-                    GetChar();
-                }
-                else if (Marker.Contains(ch))
-                {
-                    Composed = new(GetChar().ToString(), Line, Column);
-                    return true;
-                }
-                else if (Blank.Contains(ch))
-                {
-                    if (ch == '\n')
-                    {
-                        Line++;
-                        Column = 0;
-                    }
-                    GetChar();
-                }
-                else
-                {
-                    Composing.Clear();
-                    Composing.Append(GetChar());
-                    State = States.Word;
+                    case Quote:
+                        Composing.Clear();
+                        Composing.Append(GetChar());
+                        State = States.Quotation;
+                        break;
+                    case Note:
+                        State = States.Note;
+                        GetChar();
+                        break;
+                    case { } when Marker.Contains(ch):
+                        Composed = new(GetChar().ToString(), Line, Column);
+                        return true;
+                    case { } when Blank.Contains(ch):
+                        if (ch is '\n')
+                        {
+                            Line++;
+                            Column = 0;
+                        }
+                        GetChar();
+                        break;
+                    default:
+                        Composing.Clear();
+                        Composing.Append(GetChar());
+                        State = States.Word;
+                        break;
+
                 }
                 return false;
         }

@@ -1,7 +1,6 @@
-using System.Text;
-using Parser.data;
+using Parser.Data.TokenTypes;
 
-namespace Parser.helper;
+namespace Parser.Helper;
 
 public class Analysis
 {

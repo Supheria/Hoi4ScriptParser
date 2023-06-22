@@ -1,10 +1,12 @@
-﻿namespace Parser.data;
+﻿namespace Parser.Data;
 
 public class Word
 {
-    public string Text { get; init; }
-    public uint Line { get; init; }
-    public uint Column { get; init; }
+    public string Text { get; }
+
+    public uint Line { get; }
+
+    public uint Column { get; }
 
     public Word(string text, uint line, uint column)
     {
@@ -13,11 +15,8 @@ public class Word
         Column = column;
     }
 
-    public Word()
+    public Word() : this("", 0, 0)
     {
-        Text = "";
-        Line = 0;
-        Column = 0;
     }
 
     public override string ToString()
