@@ -32,18 +32,19 @@ public class Token
 public class Scope : Token
 {
     public List<Token> Property { get; }
-    public Scope(Word name, uint level)
-        : base(name, level)
+
+    public Scope(Word name, uint level) : base(name, level)
     {
         Property = new();
     }
-    public void Append(Token property)
+
+    public void Append(Token property, StringBuilder errorLog)
     {
         if (property is NullToken)
             return;
         if (property.Level != Level + 1)
         {
-            Exceptions.Exception("level mismatched of Appending in Scope");
+            errorLog.AppendLine("level mismatched of Appending in Scope");
             return;
         }
         Property.Add(property);
@@ -62,10 +63,12 @@ public class TaggedValue : Token
         Tag = tag;
         Value = new();
     }
+    
     public void Append(Word value)
     {
         Value.Add(value);
     }
+
     public new string ToString()
     {
         var sb = new StringBuilder();
@@ -80,7 +83,7 @@ public class TaggedValue : Token
 public class ValueArray : Token
 {
     public List<List<Word>> Value { get; }
-    public ValueArray(Word name, uint level) 
+    public ValueArray(Word name, uint level)
         : base(name, level)
     {
         Value = new();

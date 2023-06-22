@@ -1,54 +1,64 @@
+using System.Text;
 using Parser.data;
 
 namespace Parser.helper;
 
 public class Analysis
 {
-    public Dictionary<uint, Dictionary<string, List<TokenInfo>>> LevelMap { get; } = new();
+    //public Analysis()
+    //{
+    //    // 防止为空导致索引不存在
+    //    LevelMap[0] = new() { [""] = new() };
+    //}
 
-    public string ExceptionLogPath => Exceptions.LogPath;
+    private readonly Exceptions _exceptions = new();
+    private string _errorLog = "";
 
-    public Analysis()
+    public static void Parse(string fileOrFolder, out Dictionary<uint, Dictionary<string, List<TokenInfo>>> result, out string errorLog)
     {
-        // 防止为空导致索引不存在
-        LevelMap[0] = new() { [""] = new() };
+        var analysis = new Analysis();
+        analysis.Parse(fileOrFolder, out result);
+        errorLog = analysis._errorLog;
     }
 
-    public Analysis(string fileOrFolder, string logDir)
+    private void Parse(string fileOrFolder, out Dictionary<uint, Dictionary<string, List<TokenInfo>>> result)
     {
-        Exceptions.LogPath = Path.Combine(logDir, "hoi4 script parse exception.txt");
+        result = new();
+
         if (File.Exists(fileOrFolder))
         {
-            Exceptions.FilePath = fileOrFolder;
-            CacheMap(GetTokenInfoList(fileOrFolder), LevelMap);
+            _exceptions.FilePath = fileOrFolder;
+            CacheMap(GetTokenInfoList(fileOrFolder), result);
         }
         else if (Directory.Exists(fileOrFolder))
         {
             foreach (var file in Directory.GetFiles(fileOrFolder))
             {
-                Exceptions.FilePath = file;
-                CacheMap(GetTokenInfoList(file), LevelMap);
+                _exceptions.FilePath = file;
+                CacheMap(GetTokenInfoList(file), result);
             }
         }
+
+        _errorLog = _exceptions.ErrorString.ToString();
     }
 
-    private static List<TokenInfo> GetTokenInfoList(string filePath)
+    private IEnumerable<TokenInfo> GetTokenInfoList(string filePath)
     {
-        List<Token> tokens = new();
-        _ = new Tokenizer(filePath, tokens);
-        return tokens.Select(token => new TokenInfo(token, filePath)).ToList();
+        var tokens = Tokenizer.Tokenize(filePath, _exceptions);
+        return tokens.Select(token => new TokenInfo(token, filePath));
     }
 
-    private static void CacheMap(List<TokenInfo> infoList, Dictionary<uint, Dictionary<string, List<TokenInfo>>> map)
+    private void CacheMap(IEnumerable<TokenInfo> infos, Dictionary<uint, Dictionary<string, List<TokenInfo>>> map)
     {
-        if (infoList.FirstOrDefault() == null)
+        var infoArray = infos.ToArray();
+        if (infoArray.Length is 0)
             return;
-        var level = infoList.First().Level;
+        var level = infoArray[0].Level;
         if (!map.ContainsKey(level))
         {
             map[level] = new();
         }
-        foreach (var info in infoList)
+        foreach (var info in infoArray)
         {
             if (info.Token is Scope scope)
             {

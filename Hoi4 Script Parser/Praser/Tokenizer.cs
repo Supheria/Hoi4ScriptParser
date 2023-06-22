@@ -13,6 +13,7 @@ internal class Tokenizer
     private const char Note = '#';
     private const char Quote = '"';
     private const char Escape = '\\';
+    private readonly Exceptions _exceptions;
 
     private enum States
     {
@@ -31,36 +32,48 @@ internal class Tokenizer
     private ParseTree Tree { get; set; }
     private Element Composed { get; set; } = new();
     private StringBuilder Composing { get; } = new();
-    private List<Token> Tokens { get; }
+    private List<Token> Tokens { get; } = new();
 
-    public Tokenizer(string filePath, List<Token> tokens)
+    public Tokenizer(Exceptions exceptions)
     {
-        Tokens = tokens;
+        _exceptions = exceptions;
+        Tree = new ParseTree(_exceptions);
+    }
+
+    private List<Token> Parse(string filePath)
+    {
         ReadBuffer(filePath);
-        Tree = new ParseTree();
+        Tree = new ParseTree(_exceptions);
         while (BufferPosition < Buffer?.Length)
         {
             if (!Compose((char)Buffer[BufferPosition]))
                 continue;
             var tree = Tree.Parse(Composed);
-            if (tree == null)
+            if (tree is null)
             {
                 CacheList();
-                Tree = new ParseTree();
+                Tree = new ParseTree(_exceptions);
             }
             else { Tree = tree; }
         }
+
         EndCheck();
+        return Tokens;
     }
-    
+
+    public static List<Token> Tokenize(string filePath, Exceptions exceptions)
+    {
+        return new Tokenizer(exceptions).Parse(filePath);
+    }
+
     private void ReadBuffer(string filePath)
     {
         if (!File.Exists(filePath))
         {
-            Exceptions.Exception($"could not open file: {filePath}");
+            _exceptions.Exception($"could not open file: {filePath}");
             return;
         }
-        using var file = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+        using var file = File.OpenRead(filePath);
         if (file.ReadByte() == 0xEF && file.ReadByte() == 0xBB && file.ReadByte() == 0xBF)
         {
             Buffer = new byte[file.Length - 3];
@@ -73,9 +86,10 @@ internal class Tokenizer
             _ = file.Read(Buffer, 0, Buffer.Length);
         }
     }
+
     private bool Compose(char ch)
     {
-        if (Composed.Submitted == false) { return true; }
+        if (!Composed.Submitted) { return true; }
         switch (State)
         {
             case States.Quotation:
@@ -184,11 +198,12 @@ internal class Tokenizer
             Column++;
         return ch;
     }
+
     private void EndCheck()
     {
         if (Tree.From is not null)
         {
-            Exceptions.Exception($"interruption at line({Line}), column({Column})");
+            _exceptions.Exception($"interruption at line({Line}), column({Column})");
             Tree.Done();
             Tree = Tree.From;
             while (Tree.From is not null)
