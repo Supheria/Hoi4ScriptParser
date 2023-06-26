@@ -25,10 +25,11 @@ public class ValueArray : Token
     public override string ToString()
     {
         return new StringBuilder()
-            .AppendJoinExt(' ', Value, (sb, value) => sb
+            .AppendJoinExt('\0', Value, (sb, value) => sb
                 .Append('(')
                 .AppendJoin(' ', value)
-                .Append(')'))
+                .Append(')')
+                .Append('\n'))
             .ToString();
     }
 }

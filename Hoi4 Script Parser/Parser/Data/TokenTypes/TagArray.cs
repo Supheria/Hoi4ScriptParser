@@ -31,14 +31,15 @@ public class TagArray : Token
     public override string ToString()
     {
         return new StringBuilder()
-            .AppendJoinExt(' ', Value, (sb, value) => sb
+            .AppendJoinExt('\0', Value, (sb, value) => sb
                 .Append('(')
                 .AppendJoinExt(' ', value, (sb2, pair) => sb2
                     .Append(pair.Key)
                     .Append('[')
                     .AppendJoin(' ', pair.Value)
                     .Append(']'))
-                .Append(')'))
+                .Append(')')
+                .Append('\n'))
             .ToString();
     }
 }
