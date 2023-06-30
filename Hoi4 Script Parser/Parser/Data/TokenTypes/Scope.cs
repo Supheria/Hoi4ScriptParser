@@ -6,7 +6,7 @@ public class Scope : Token
 {
     public List<Token> Property { get; }
 
-    public Scope(Word name, uint level) : base(name, level)
+    public Scope(Token? from, Word name, uint level) : base(from, name, level)
     {
         Property = new();
     }

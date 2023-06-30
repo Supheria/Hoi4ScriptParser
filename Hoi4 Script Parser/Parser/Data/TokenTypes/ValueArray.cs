@@ -7,7 +7,7 @@ public class ValueArray : Token
 {
     public List<List<Word>> Value { get; }
 
-    public ValueArray(Word name, uint level) : base(name, level)
+    public ValueArray(Token? from, Word name, uint level) : base(from, name, level)
     {
         Value = new();
     }
@@ -22,7 +22,7 @@ public class ValueArray : Token
         Value.Add(new() { value });
     }
 
-    public override string ToString()
+    public override string ValueToString()
     {
         return new StringBuilder()
             .AppendJoinExt('\0', Value, (sb, value) => sb

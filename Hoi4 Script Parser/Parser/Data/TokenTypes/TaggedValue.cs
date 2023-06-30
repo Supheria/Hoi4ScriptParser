@@ -10,8 +10,8 @@ public class TaggedValue : Token
 
     public List<Word> Value { get; }
 
-    public TaggedValue(Word name, uint level, Word @operator, Word tag)
-        : base(name, level)
+    public TaggedValue(Token? from, Word name, uint level, Word @operator, Word tag)
+        : base(from, name, level)
     {
         Operator = @operator;
         Tag = tag;
@@ -23,7 +23,7 @@ public class TaggedValue : Token
         Value.Add(value);
     }
 
-    public override string ToString()
+    public override string ValueToString()
     {
         return new StringBuilder()
             .Append(Tag)

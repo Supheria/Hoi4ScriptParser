@@ -2,19 +2,27 @@
 
 public class Token
 {
+    public Token? From { get; }
+
     public Word Name { get; }
 
     public uint Level { get; }
 
-    public Token(Word name, uint level)
+    public Token(Token? from, Word name, uint level)
     {
+        From = from is NullToken ? null : from;
         Name = name;
         Level = level;
     }
 
+    public virtual string ValueToString()
+    {
+        return "";
+    }
+
     public override string ToString()
     {
-        return Name.Text;
+        return $"{Name.Text} ({Level})";
     }
 
     public uint Line => Name.Line;

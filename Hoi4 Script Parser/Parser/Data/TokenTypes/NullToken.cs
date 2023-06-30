@@ -2,7 +2,7 @@
 
 public class NullToken : Token
 {
-    public NullToken() : base(new(), 0)
+    public NullToken() : base(null, new(), 0)
     {
     }
 }

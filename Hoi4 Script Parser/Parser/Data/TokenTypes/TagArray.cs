@@ -7,8 +7,8 @@ public class TagArray : Token
 {
     public List<List<KeyValuePair<Word, List<Word>>>> Value { get; }
 
-    public TagArray(Word name, uint level)
-        : base(name, level)
+    public TagArray(Token? from, Word name, uint level)
+        : base(from, name, level)
     {
         Value = new();
     }
@@ -28,7 +28,7 @@ public class TagArray : Token
         Value.Add(new() { new(value, new()) });
     }
 
-    public override string ToString()
+    public override string ValueToString()
     {
         return new StringBuilder()
             .AppendJoinExt('\0', Value, (sb, value) => sb

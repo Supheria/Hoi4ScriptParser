@@ -195,7 +195,8 @@ internal class ParseTree
                     element.Get();
                     return From;
                 case CloseBrace:
-                    ((Scope)Builder).Append(new(Value, Level + 1), _exceptions.ErrorString);
+                    ((Scope)Builder).Append(
+                        new(From?.Builder, Value, Level + 1), _exceptions.ErrorString);
                     element.Get();
                     Done();
                     return From;
@@ -205,7 +206,7 @@ internal class ParseTree
                     Step = Steps.Sub;
                     return new(this, Level + 1, Value, element.Get(), _exceptions);
                 default:
-                    ((Scope)Builder).Append(new(Value, Level + 1), _exceptions.ErrorString);
+                    ((Scope)Builder).Append(new(From?.Builder, Value, Level + 1), _exceptions.ErrorString);
                     Value = element.Get();
                     return this;
             }
@@ -283,19 +284,19 @@ internal class ParseTree
                     return From;
                 case Equal:
                     Step = Steps.Array | Steps.Tag;
-                    Builder = new TagArray(Name, Level);
+                    Builder = new TagArray(From?.Builder, Name, Level);
                     ((TagArray)Builder).AppendNew(Array);
                     element.Get();
                     return this;
                 case CloseBrace:
                     Step = Steps.Array | Steps.Value | Steps.Off;
-                    Builder = new ValueArray(Name, Level);
+                    Builder = new ValueArray(From?.Builder, Name, Level);
                     ((ValueArray)Builder).AppendNew(Array);
                     element.Get();
                     return this;
                 default:
                     Step = Steps.Array | Steps.Value;
-                    Builder = new ValueArray(Name, Level);
+                    Builder = new ValueArray(From?.Builder, Name, Level);
                     ((ValueArray)Builder).AppendNew(Array);
                     ((ValueArray)Builder).Append(element.Get());
                     return this;
@@ -591,7 +592,7 @@ internal class ParseTree
                 default:
                     Step = Steps.Sub | Steps.Name;
                     Value = element.Get();
-                    Builder = new Scope(Name, Level);
+                    Builder = new Scope(From?.Builder, Name, Level);
                     return this;
             }
         }
@@ -624,7 +625,7 @@ internal class ParseTree
                     }
                 default:
                     Step = Steps.Value;
-                    Builder = new TaggedValue(Name, Level, Operator, element.Get());
+                    Builder = new TaggedValue(From?.Builder, Name, Level, Operator, element.Get());
                     return this;
             }
         }
