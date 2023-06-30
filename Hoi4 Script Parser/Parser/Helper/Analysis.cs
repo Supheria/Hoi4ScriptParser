@@ -52,7 +52,7 @@ public class Analysis
         var infoArray = infos.ToArray();
         if (infoArray.Length is 0)
             return;
-        var level = infoArray[0].Level;
+        var level = infoArray[0].Token.Level;
         if (!map.ContainsKey(level))
         {
             map[level] = new();
@@ -64,11 +64,11 @@ public class Analysis
                 var property = scope.Property.Select(token => new TokenInfo(token, info.FilePath)).ToList();
                 CacheMap(property, map);
             }
-            if (!map[level].ContainsKey(info.Name))
+            if (!map[level].ContainsKey(info.Token.Name.Text))
             {
-                map[level][info.Name] = new();
+                map[level][info.Token.Name.Text] = new();
             }
-            map[level][info.Name].Add(info);
+            map[level][info.Token.Name.Text].Add(info);
         }
     }
 }

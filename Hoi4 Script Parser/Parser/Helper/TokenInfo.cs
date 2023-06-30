@@ -13,12 +13,4 @@ public class TokenInfo
         Token = token;
         FilePath = filePath;
     }
-
-    public string Name => Token.Name.Text;
-
-    public uint Level => Token.Level;
-
-    public uint Line => Token.Line;
-
-    public uint Column => Token.Column;
 }
