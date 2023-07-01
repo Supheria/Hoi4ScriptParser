@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using Utilities;
+using Parser.Utilities;
 
 namespace Parser.Data.TokenTypes;
 
