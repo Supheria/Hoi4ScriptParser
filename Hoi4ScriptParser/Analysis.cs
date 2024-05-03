@@ -1,6 +1,7 @@
-using Parser.Data.TokenTypes;
+using Hoi4ScriptParser.Data;
+using Hoi4ScriptParser.Model;
 
-namespace Parser.Helper;
+namespace Hoi4ScriptParser;
 
 public class Analysis
 {

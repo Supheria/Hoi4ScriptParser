@@ -1,4 +1,4 @@
-﻿namespace Parser.Data;
+﻿namespace Hoi4ScriptParser.Model;
 
 internal class Element
 {
@@ -6,9 +6,9 @@ internal class Element
 
     public bool Submitted { get; private set; }
 
-    public uint Line { get; }
+    public int Line { get; }
 
-    public uint Column { get; }
+    public int Column { get; }
 
     public Element()
     {
@@ -16,7 +16,7 @@ internal class Element
         Submitted = true;
     }
 
-    public Element(string text, uint line, uint column)
+    public Element(string text, int line, int column)
     {
         Text = text;
         Line = line;

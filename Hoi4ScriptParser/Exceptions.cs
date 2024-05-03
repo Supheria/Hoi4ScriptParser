@@ -1,7 +1,7 @@
-﻿using Parser.Data;
-using System.Text;
+﻿using System.Text;
+using Hoi4ScriptParser.Model;
 
-namespace Parser;
+namespace Hoi4ScriptParser;
 
 internal class Exceptions
 {

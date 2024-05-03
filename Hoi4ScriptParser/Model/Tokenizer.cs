@@ -1,19 +1,18 @@
-﻿using Parser.Data;
-using Parser.Data.TokenTypes;
-using System.Text;
+﻿using System.Text;
+using Hoi4ScriptParser.Data;
 
-namespace Parser;
+namespace Hoi4ScriptParser.Model;
 
 internal class Tokenizer
 {
-    private static readonly char[] Delimiter = { '\t', ' ', '\n', '\r', '#', '=', '>', '<', '}', '{', '"', '\0' };
-    private static readonly char[] Blank = { '\t', ' ', '\n', '\r', '\0' };
-    private static readonly char[] EndLine = { '\n', '\r', '\0' };
-    private static readonly char[] Marker = { '=', '>', '<', '}', '{' };
-    private const char Note = '#';
-    private const char Quote = '"';
-    private const char Escape = '\\';
-    private readonly Exceptions _exceptions;
+    const char Note = '#';
+    const char Quote = '"';
+    const char Escape = '\\';
+    static char[] Delimiter { get; } = ['\t', ' ', '\n', '\r', '#', '=', '>', '<', '}', '{', '"', '\0'];
+    static char[] Blank { get; } = ['\t', ' ', '\n', '\r', '\0'];
+    static char[] EndLine { get; } = ['\n', '\r', '\0'];
+    static char[] Marker { get; } = ['=', '>', '<', '}', '{'];
+    Exceptions Exceptions { get; }
 
     private enum States
     {
@@ -24,34 +23,34 @@ internal class Tokenizer
         Note
     }
 
-    private States State { get; set; } = States.None;
+    States State { get; set; } = States.None;
 
-    private byte[] Buffer { get; set; } = Array.Empty<byte>();
+    byte[] Buffer { get; set; } = [];
 
-    private uint BufferPosition { get; set; }
+    int BufferPosition { get; set; }
 
-    private uint Line { get; set; } = 1;
+    int Line { get; set; } = 1;
 
-    private uint Column { get; set; }
+    int Column { get; set; }
 
-    private ParseTree Tree { get; set; }
+    ParseTree Tree { get; set; }
 
-    private Element Composed { get; set; } = new();
+    Element Composed { get; set; } = new();
 
-    private StringBuilder Composing { get; } = new();
+    StringBuilder Composing { get; } = new();
 
-    private List<Token> Tokens { get; } = new();
+    List<Token> Tokens { get; } = new();
 
     public Tokenizer(Exceptions exceptions)
     {
-        _exceptions = exceptions;
-        Tree = new(_exceptions);
+        Exceptions = exceptions;
+        Tree = new(Exceptions);
     }
 
     private List<Token> Parse(string filePath)
     {
         ReadBuffer(filePath);
-        Tree = new(_exceptions);
+        Tree = new(Exceptions);
         while (BufferPosition < Buffer?.Length)
         {
             if (!Compose((char)Buffer[BufferPosition]))
@@ -60,7 +59,7 @@ internal class Tokenizer
             if (tree is null)
             {
                 CacheList();
-                Tree = new(_exceptions);
+                Tree = new(Exceptions);
             }
             else { Tree = tree; }
         }
@@ -78,7 +77,7 @@ internal class Tokenizer
     {
         if (!File.Exists(filePath))
         {
-            _exceptions.Exception($"could not open file: {filePath}");
+            Exceptions.Exception($"could not open file: {filePath}");
             return;
         }
         using var file = File.OpenRead(filePath);
@@ -206,7 +205,7 @@ internal class Tokenizer
     {
         if (Tree.From is not null)
         {
-            _exceptions.Exception($"interruption at line({Line}), column({Column})");
+            Exceptions.Exception($"interruption at line({Line}), column({Column})");
             Tree.Done();
             Tree = Tree.From;
             while (Tree.From is not null)

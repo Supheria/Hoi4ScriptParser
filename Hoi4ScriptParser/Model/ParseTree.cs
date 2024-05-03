@@ -1,17 +1,16 @@
-﻿using Parser.Data;
-using Parser.Data.TokenTypes;
+﻿using Hoi4ScriptParser.Data;
 
-namespace Parser;
+namespace Hoi4ScriptParser.Model;
 
 internal class ParseTree
 {
-    private const char OpenBrace = '{';
-    private const char CloseBrace = '}';
-    private const char Equal = '=';
-    private const char Greater = '>';
-    private const char Less = '<';
+    const char OpenBrace = '{';
+    const char CloseBrace = '}';
+    const char Equal = '=';
+    const char Greater = '>';
+    const char Less = '<';
 
-    private readonly Exceptions _exceptions;
+    Exceptions Exceptions { get; }
 
     [Flags]
     private enum Steps
@@ -47,7 +46,7 @@ internal class ParseTree
     {
         From = null;
         Level = 0;
-        _exceptions = exceptions;
+        Exceptions = exceptions;
     }
 
     public ParseTree(ParseTree from, uint level, Word key, Word @operator, Exceptions exceptions)
@@ -57,7 +56,7 @@ internal class ParseTree
         Name = key;
         Operator = @operator;
         Step = Steps.Operator;
-        _exceptions = exceptions;
+        Exceptions = exceptions;
     }
 
     public Token OnceGet()
@@ -79,7 +78,7 @@ internal class ParseTree
 
     private void Append(Token token)
     {
-        (Builder as Scope)?.Append(token, _exceptions.ErrorString);
+        (Builder as Scope)?.Append(token, Exceptions.ErrorString);
     }
 
     public ParseTree? Parse(Element element)
@@ -111,7 +110,7 @@ internal class ParseTree
                     Operator = element.Get();
                     return this;
                 default:
-                    _exceptions.UnexpectedOperator(element);
+                    Exceptions.UnexpectedOperator(element);
                     element.Get();
                     return From;
             }
@@ -144,7 +143,7 @@ internal class ParseTree
                 case Equal:
                 case Greater:
                 case Less:
-                    _exceptions.UnexpectedValue(element);
+                    Exceptions.UnexpectedValue(element);
                     element.Get();
                     return From;
                 case CloseBrace:
@@ -169,7 +168,7 @@ internal class ParseTree
                 case Equal:
                 case Greater:
                 case Less:
-                    _exceptions.UnexpectedName(element);
+                    Exceptions.UnexpectedName(element);
                     element.Get();
                     return From;
                 default:
@@ -191,12 +190,12 @@ internal class ParseTree
             switch (ch)
             {
                 case OpenBrace:
-                    _exceptions.UnexpectedValue(element);
+                    Exceptions.UnexpectedValue(element);
                     element.Get();
                     return From;
                 case CloseBrace:
                     ((Scope)Builder).Append(
-                        new(From?.Builder, Value, Level + 1), _exceptions.ErrorString);
+                        new(From?.Builder, Value, Level + 1), Exceptions.ErrorString);
                     element.Get();
                     Done();
                     return From;
@@ -204,9 +203,9 @@ internal class ParseTree
                 case Greater:
                 case Less:
                     Step = Steps.Sub;
-                    return new(this, Level + 1, Value, element.Get(), _exceptions);
+                    return new(this, Level + 1, Value, element.Get(), Exceptions);
                 default:
-                    ((Scope)Builder).Append(new(From?.Builder, Value, Level + 1), _exceptions.ErrorString);
+                    ((Scope)Builder).Append(new(From?.Builder, Value, Level + 1), Exceptions.ErrorString);
                     Value = element.Get();
                     return this;
             }
@@ -261,7 +260,7 @@ internal class ParseTree
                     Done();
                     return From;
                 default:
-                    _exceptions.UnexpectedArraySyntax(element);
+                    Exceptions.UnexpectedArraySyntax(element);
                     element.Get();
                     return From;
             }
@@ -274,12 +273,12 @@ internal class ParseTree
             switch (ch)
             {
                 case OpenBrace:
-                    _exceptions.UnexpectedValue(element);
+                    Exceptions.UnexpectedValue(element);
                     element.Get();
                     return From;
                 case Greater:
                 case Less:
-                    _exceptions.UnexpectedOperator(element);
+                    Exceptions.UnexpectedOperator(element);
                     element.Get();
                     return From;
                 case Equal:
@@ -313,7 +312,7 @@ internal class ParseTree
                 case Equal:
                 case Greater:
                 case Less:
-                    _exceptions.UnexpectedValue(element);
+                    Exceptions.UnexpectedValue(element);
                     element.Get();
                     return From;
                 case CloseBrace:
@@ -344,7 +343,7 @@ internal class ParseTree
                     case Equal:
                     case Greater:
                     case Less:
-                        _exceptions.UnexpectedName(element);
+                        Exceptions.UnexpectedName(element);
                         element.Get();
                         return From;
                     case CloseBrace:
@@ -368,7 +367,7 @@ internal class ParseTree
                     case Equal:
                     case Greater:
                     case Less:
-                        _exceptions.UnexpectedValue(element);
+                        Exceptions.UnexpectedValue(element);
                         element.Get();
                         return From;
                     case CloseBrace:
@@ -398,7 +397,7 @@ internal class ParseTree
                     Done();
                     return From;
                 default:
-                    _exceptions.UnexpectedArraySyntax(element);
+                    Exceptions.UnexpectedArraySyntax(element);
                     element.Get();
                     return From;
             }
@@ -414,7 +413,7 @@ internal class ParseTree
                 case Equal:
                 case Greater:
                 case Less:
-                    _exceptions.UnexpectedName(element);
+                    Exceptions.UnexpectedName(element);
                     element.Get();
                     return From;
                 case CloseBrace:
@@ -440,11 +439,11 @@ internal class ParseTree
                     return this;
                 case Greater:
                 case Less:
-                    _exceptions.UnexpectedOperator(element);
+                    Exceptions.UnexpectedOperator(element);
                     element.Get();
                     return From;
                 default:
-                    _exceptions.UnexpectedArrayType(element);
+                    Exceptions.UnexpectedArrayType(element);
                     element.Get();
                     return From;
             }
@@ -461,7 +460,7 @@ internal class ParseTree
                     element.Get();
                     return this;
                 default:
-                    _exceptions.UnexpectedArrayType(element);
+                    Exceptions.UnexpectedArrayType(element);
                     element.Get();
                     return From;
             }
@@ -487,7 +486,7 @@ internal class ParseTree
                     Done();
                     return From;
                 default:
-                    _exceptions.UnexpectedArraySyntax(element);
+                    Exceptions.UnexpectedArraySyntax(element);
                     element.Get();
                     return From;
             }
@@ -503,7 +502,7 @@ internal class ParseTree
                 case Equal:
                 case Greater:
                 case Less:
-                    _exceptions.UnexpectedValue(element);
+                    Exceptions.UnexpectedValue(element);
                     element.Get();
                     return From;
                 case CloseBrace:
@@ -527,7 +526,7 @@ internal class ParseTree
                 case Equal:
                 case Greater:
                 case Less:
-                    _exceptions.UnexpectedArrayType(element);
+                    Exceptions.UnexpectedArrayType(element);
                     element.Get();
                     return From;
                 case CloseBrace:
@@ -551,7 +550,7 @@ internal class ParseTree
                 case Equal:
                 case Greater:
                 case Less:
-                    _exceptions.UnexpectedValue(element);
+                    Exceptions.UnexpectedValue(element);
                     element.Get();
                     return From;
                 case CloseBrace:
@@ -578,7 +577,7 @@ internal class ParseTree
                 case Equal:
                 case Greater:
                 case Less:
-                    _exceptions.UnexpectedValue(element);
+                    Exceptions.UnexpectedValue(element);
                     element.Get();
                     return From;
                 case CloseBrace:
@@ -607,13 +606,13 @@ internal class ParseTree
                 case Equal:
                 case Greater:
                 case Less:
-                    _exceptions.UnexpectedValue(element);
+                    Exceptions.UnexpectedValue(element);
                     element.Get();
                     return From;
                 case OpenBrace:
                     if (Operator.Text[0] != Equal)
                     {
-                        _exceptions.UnexpectedOperator(element);
+                        Exceptions.UnexpectedOperator(element);
                         element.Get();
                         return From;
                     }

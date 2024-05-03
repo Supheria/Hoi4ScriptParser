@@ -1,16 +1,12 @@
-﻿using System.Text;
-using Parser.Utilities;
+﻿using Hoi4ScriptParser.Model;
+using LocalUtilities.StringUtilities;
+using System.Text;
 
-namespace Parser.Data.TokenTypes;
+namespace Hoi4ScriptParser.Data;
 
-public class ValueArray : Token
+public class ValueArray(Token? from, Word name, uint level) : Token(from, name, level)
 {
-    public List<List<Word>> Value { get; }
-
-    public ValueArray(Token? from, Word name, uint level) : base(from, name, level)
-    {
-        Value = new();
-    }
+    public List<List<Word>> Value { get; } = [];
 
     public void Append(Word value)
     {
@@ -19,13 +15,13 @@ public class ValueArray : Token
 
     public void AppendNew(Word value)
     {
-        Value.Add(new() { value });
+        Value.Add([value]);
     }
 
     public override string ValueToString()
     {
         return new StringBuilder()
-            .AppendJoinExt('\0', Value, (sb, value) => sb
+            .AppendJoin('\0', Value, (sb, value) => sb
                 .Append('(')
                 .AppendJoin(' ', value)
                 .Append(')')

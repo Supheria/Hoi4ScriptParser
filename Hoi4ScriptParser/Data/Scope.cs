@@ -1,15 +1,11 @@
 ﻿using System.Text;
+using Hoi4ScriptParser.Model;
 
-namespace Parser.Data.TokenTypes;
+namespace Hoi4ScriptParser.Data;
 
-public class Scope : Token
+public class Scope(Token? from, Word name, uint level) : Token(from, name, level)
 {
-    public List<Token> Property { get; }
-
-    public Scope(Token? from, Word name, uint level) : base(from, name, level)
-    {
-        Property = new();
-    }
+    public List<Token> Property { get; } = [];
 
     public void Append(Token property, StringBuilder errorLog)
     {
