@@ -1,8 +1,6 @@
 ﻿namespace Hoi4ScriptParser.Data;
 
-public class NullToken : Token
+public class NullToken() : Token(null, new(), 0)
 {
-    public NullToken() : base(null, new(), 0)
-    {
-    }
+
 }

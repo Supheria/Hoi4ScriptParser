@@ -40,7 +40,7 @@ internal class ParseTree
 
     public ParseTree? From { get; }
 
-    private uint Level { get; }
+    private int Level { get; }
 
     public ParseTree(Exceptions exceptions)
     {
@@ -49,7 +49,7 @@ internal class ParseTree
         Exceptions = exceptions;
     }
 
-    public ParseTree(ParseTree from, uint level, Word key, Word @operator, Exceptions exceptions)
+    public ParseTree(ParseTree from, int level, Word key, Word @operator, Exceptions exceptions)
     {
         From = from;
         Level = level;
@@ -78,7 +78,7 @@ internal class ParseTree
 
     private void Append(Token token)
     {
-        (Builder as Scope)?.Append(token, Exceptions.ErrorString);
+        (Builder as Scope)?.Append(token, Exceptions.Log);
     }
 
     public ParseTree? Parse(Element element)
@@ -195,7 +195,7 @@ internal class ParseTree
                     return From;
                 case CloseBrace:
                     ((Scope)Builder).Append(
-                        new(From?.Builder, Value, Level + 1), Exceptions.ErrorString);
+                        new(From?.Builder, Value, Level + 1), Exceptions.Log);
                     element.Get();
                     Done();
                     return From;
@@ -205,7 +205,7 @@ internal class ParseTree
                     Step = Steps.Sub;
                     return new(this, Level + 1, Value, element.Get(), Exceptions);
                 default:
-                    ((Scope)Builder).Append(new(From?.Builder, Value, Level + 1), Exceptions.ErrorString);
+                    ((Scope)Builder).Append(new(From?.Builder, Value, Level + 1), Exceptions.Log);
                     Value = element.Get();
                     return this;
             }

@@ -14,18 +14,23 @@ public class Word(string text, int line, int column)
     {
     }
 
-    public override string ToString() => $"{Text}({Line},{Column})";
+    public override string ToString() => $"{Text}";
 
-    public static bool operator ==(Word left, Word right) =>
-        left.Text == right.Text && left.Line == right.Line && left.Column == right.Column;
+    public static bool operator ==(Word word, object? obj)
+    {
+        if (obj is not Word other)
+            return false;
+        return word.Text == other.Text && word.Line == other.Line && word.Column == other.Column;
+    }
 
-    public static bool operator !=(Word left, Word right) => !(left == right);
+    public static bool operator !=(Word word, object? obj)
+    {
+        return !(word == obj);
+    }
 
     public override bool Equals(object? obj)
     {
-        if (obj is not Word word)
-            return false;
-        return this == word;
+        return this == obj;
     }
 
     public override int GetHashCode()

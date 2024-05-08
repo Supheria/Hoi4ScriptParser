@@ -8,11 +8,10 @@ internal class Tokenizer
     const char Note = '#';
     const char Quote = '"';
     const char Escape = '\\';
-    static char[] Delimiter { get; } = ['\t', ' ', '\n', '\r', '#', '=', '>', '<', '}', '{', '"', '\0'];
-    static char[] Blank { get; } = ['\t', ' ', '\n', '\r', '\0'];
+    static char[] Delimiter { get; } = ['\t', ' ', '\n', '\r', '#', '=', '>', '<', '}', '{', '"', ',', '\0'];
+    static char[] Blank { get; } = ['\t', ' ', '\n', '\r', ',', '\0'];
     static char[] EndLine { get; } = ['\n', '\r', '\0'];
     static char[] Marker { get; } = ['=', '>', '<', '}', '{'];
-    Exceptions Exceptions { get; }
 
     private enum States
     {
@@ -22,6 +21,8 @@ internal class Tokenizer
         Word,
         Note
     }
+
+    Exceptions Exceptions { get; }
 
     States State { get; set; } = States.None;
 
@@ -39,15 +40,16 @@ internal class Tokenizer
 
     StringBuilder Composing { get; } = new();
 
-    List<Token> Tokens { get; } = new();
+    internal List<Token> Tokens { get; } = new();
 
-    public Tokenizer(Exceptions exceptions)
+    internal Tokenizer(Exceptions exceptions, string filePath)
     {
         Exceptions = exceptions;
         Tree = new(Exceptions);
+        Parse(filePath);
     }
 
-    private List<Token> Parse(string filePath)
+    private void Parse(string filePath)
     {
         ReadBuffer(filePath);
         Tree = new(Exceptions);
@@ -63,14 +65,7 @@ internal class Tokenizer
             }
             else { Tree = tree; }
         }
-
         EndCheck();
-        return Tokens;
-    }
-
-    public static List<Token> Tokenize(string filePath, Exceptions exceptions)
-    {
-        return new Tokenizer(exceptions).Parse(filePath);
     }
 
     private void ReadBuffer(string filePath)
@@ -96,7 +91,8 @@ internal class Tokenizer
 
     private bool Compose(char ch)
     {
-        if (!Composed.Submitted) { return true; }
+        if (!Composed.Submitted)
+            return true;
         switch (State)
         {
             case States.Quotation:

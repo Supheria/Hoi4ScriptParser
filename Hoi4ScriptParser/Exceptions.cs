@@ -5,9 +5,7 @@ namespace Hoi4ScriptParser;
 
 internal class Exceptions
 {
-    internal StringBuilder ErrorString { get; set; } = new();
-
-    private string _filePath = "";
+    internal StringBuilder Log { get; set; } = new();
 
     internal string FilePath
     {
@@ -20,6 +18,7 @@ internal class Exceptions
             NewFilePath = true;
         }
     }
+    string _filePath = "";
 
     private bool NewFilePath { get; set; } = true;
 
@@ -62,9 +61,9 @@ internal class Exceptions
     {
         if (NewFilePath)
         {
-            ErrorString.AppendLine(FilePath);
+            Log.AppendLine(FilePath);
             NewFilePath = false;
         }
-        ErrorString.AppendLine($"\t{message}");
+        Log.AppendLine($"\t{message}");
     }
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Hoi4ScriptParser.Data;
 
-public class TagArray(Token? from, Word name, uint level) : Token(from, name, level)
+public class TagArray(Token? from, Word name, int level) : Token(from, name, level)
 {
     public List<List<KeyValuePair<Word, List<Word>>>> Value { get; } = [];
 
@@ -23,17 +23,26 @@ public class TagArray(Token? from, Word name, uint level) : Token(from, name, le
         Value.Add([new(value, [])]);
     }
 
-    public override string ValueToString()
+    public override string ToString()
     {
         return new StringBuilder()
-            .AppendJoin('\0', Value, (sb, value) => sb
-                    .Append('(').AppendJoin(' ', value, (sb2, pair) => sb2
-                    .Append(pair.Key)
-                    .Append('[')
+            .AppendTab(Level)
+            .Append($"{Name} = {{\n")
+            .AppendJoin('\0', Value, (sb, pairs) =>
+            {
+                sb.AppendTab(Level + 1)
+                .Append("{ ")
+                .AppendJoin(' ', pairs, (sb, pair) =>
+                {
+                    sb.Append(pair.Key)
+                    .Append(" = { ")
                     .AppendJoin(' ', pair.Value)
-                    .Append(']'))
-                .Append(')')
-                .Append('\n'))
+                    .Append(" }");
+                })
+                .Append(" }\n");
+            })
+            .AppendTab(Level)
+            .Append("}\n")
             .ToString();
     }
 }
