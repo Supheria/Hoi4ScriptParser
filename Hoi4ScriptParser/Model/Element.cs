@@ -28,9 +28,9 @@ internal class Element
         return Text.FirstOrDefault();
     }
 
-    public Word Get()
+    public string Get()
     {
         Submitted = true;
-        return new(Text, Line, Column);
+        return Text;
     }
 }

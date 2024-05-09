@@ -59,9 +59,9 @@ public class Analyzer
                 var property = scope.Property.Select(token => new TokenInfo(token, info.FilePath)).ToList();
                 AnalyzeTokenInfos(property, map);
             }
-            if (!map[level].ContainsKey(info.Token.Name.Text))
-                map[level][info.Token.Name.Text] = [];
-            map[level][info.Token.Name.Text].Add(info);
+            if (!map[level].ContainsKey(info.Token.Name))
+                map[level][info.Token.Name] = [];
+            map[level][info.Token.Name].Add(info);
         }
     }
 }

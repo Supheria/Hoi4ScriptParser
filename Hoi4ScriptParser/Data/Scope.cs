@@ -4,7 +4,7 @@ using LocalUtilities.StringUtilities;
 
 namespace Hoi4ScriptParser.Data;
 
-public class Scope(Token? from, Word name, int level) : Token(from, name, level)
+public class Scope(Token? from, string name, int level) : Token(from, name, level)
 {
     public List<Token> Property { get; } = [];
 
@@ -23,14 +23,12 @@ public class Scope(Token? from, Word name, int level) : Token(from, name, level)
     public override string ToString()
     {
         return new StringBuilder()
-            .AppendTab(Level)
-            .Append($"{Name} = {{\n")
+            .AppendNameStart(Level, Name)
             .AppendJoin('\0', Property, (sb, property) => 
             {
                 sb.Append(property.ToString());
             })
-            .AppendTab(Level)
-            .Append("}\n")
+            .AppendNameEnd(Level)
             .ToString();
     }
 }

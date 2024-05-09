@@ -103,7 +103,7 @@ internal class Tokenizer
                         State = States.Escape;
                         return false;
                     case Quote:
-                        Composing.Append(GetChar());
+                        //Composing.Append(GetChar());
                         Composed = new(Composing.ToString(), Line, Column);
                         State = States.None;
                         return true;
@@ -118,8 +118,7 @@ internal class Tokenizer
             case States.Escape:
                 if (EndLine.Contains(ch))
                 {
-                    Composing.Append(Quote);
-                    Composing.Append(Quote);
+                    //Composing.Append(Quote).Append(Quote);
                     Composed = new(Composing.ToString(), Line, Column);
                     State = States.None;
                     return true;
@@ -151,7 +150,8 @@ internal class Tokenizer
                 {
                     case Quote:
                         Composing.Clear();
-                        Composing.Append(GetChar());
+                        //Composing.Append(GetChar());
+                        GetChar();
                         State = States.Quotation;
                         break;
                     case Note:

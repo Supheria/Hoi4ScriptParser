@@ -5,11 +5,11 @@ using LocalUtilities.StringUtilities;
 
 namespace Hoi4ScriptParser.Data;
 
-public class Token(Token? from, Word name, int level)
+public class Token(Token? from, string name, int level)
 {
     public Token? From { get; } = from is NullToken ? null : from;
 
-    public Word Name { get; } = name;
+    public string Name { get; } = name;
 
     public int Level { get; } = level;
 

@@ -28,13 +28,13 @@ internal class ParseTree
 
     private Steps Step { get; set; } = Steps.None;
 
-    private Word Name { get; set; } = new();
+    private string Name { get; set; } = "";
 
-    private Word Operator { get; set; } = new();
+    private string Operator { get; set; } = "";
 
-    private Word Value { get; set; } = new();
+    private string Value { get; set; } = "";
 
-    private Word Array { get; set; } = new();
+    private string Array { get; set; } = "";
 
     private Token Builder { get; set; } = new NullToken();
 
@@ -49,7 +49,7 @@ internal class ParseTree
         Exceptions = exceptions;
     }
 
-    public ParseTree(ParseTree from, int level, Word key, Word @operator, Exceptions exceptions)
+    public ParseTree(ParseTree from, int level, string key, string @operator, Exceptions exceptions)
     {
         From = from;
         Level = level;
@@ -152,7 +152,7 @@ internal class ParseTree
                     return From;
                 default:
                     Step = Steps.Tag;
-                    ((TaggedValue)Builder).Append(element.Get());
+                    ((TagValues)Builder).Append(element.Get());
                     return this;
             }
         }
@@ -283,21 +283,21 @@ internal class ParseTree
                     return From;
                 case Equal:
                     Step = Steps.Array | Steps.Tag;
-                    Builder = new TagArray(From?.Builder, Name, Level);
-                    ((TagArray)Builder).AppendNew(Array);
+                    Builder = new TagValuesPairsArray(From?.Builder, Name, Level);
+                    ((TagValuesPairsArray)Builder).AppendNew(Array);
                     element.Get();
                     return this;
                 case CloseBrace:
                     Step = Steps.Array | Steps.Value | Steps.Off;
-                    Builder = new ValueArray(From?.Builder, Name, Level);
-                    ((ValueArray)Builder).AppendNew(Array);
+                    Builder = new ValuesArray(From?.Builder, Name, Level);
+                    ((ValuesArray)Builder).AppendNew(Array);
                     element.Get();
                     return this;
                 default:
                     Step = Steps.Array | Steps.Value;
-                    Builder = new ValueArray(From?.Builder, Name, Level);
-                    ((ValueArray)Builder).AppendNew(Array);
-                    ((ValueArray)Builder).Append(element.Get());
+                    Builder = new ValuesArray(From?.Builder, Name, Level);
+                    ((ValuesArray)Builder).AppendNew(Array);
+                    ((ValuesArray)Builder).Append(element.Get());
                     return this;
             }
         }
@@ -352,7 +352,7 @@ internal class ParseTree
                         return this;
                     default:
                         Step = Steps.Array | Steps.Tag | Steps.Name;
-                        ((TagArray)Builder).AppendTag(element.Get());
+                        ((TagValuesPairsArray)Builder).AppendTag(element.Get());
                         return this;
                 }
             }
@@ -376,7 +376,7 @@ internal class ParseTree
                         return this;
                     default:
                         element.Get();
-                        ((TagArray)Builder).Append(element.Get());
+                        ((TagValuesPairsArray)Builder).Append(element.Get());
                         return this;
                 }
             }
@@ -422,7 +422,7 @@ internal class ParseTree
                     return this;
                 default:
                     Step = Steps.Array | Steps.Tag | Steps.Name;
-                    ((TagArray)Builder).AppendNew(element.Get());
+                    ((TagValuesPairsArray)Builder).AppendNew(element.Get());
                     return this;
             }
         }
@@ -511,7 +511,7 @@ internal class ParseTree
                     return this;
                 default:
                     Step = Steps.Array | Steps.Value | Steps.Name;
-                    ((ValueArray)Builder).AppendNew(element.Get());
+                    ((ValuesArray)Builder).AppendNew(element.Get());
                     return this;
             }
         }
@@ -535,7 +535,7 @@ internal class ParseTree
                     return this;
                 default:
                     Step = Steps.Array | Steps.Value;
-                    ((ValueArray)Builder).Append(element.Get());
+                    ((ValuesArray)Builder).Append(element.Get());
                     return this;
             }
         }
@@ -558,7 +558,7 @@ internal class ParseTree
                     element.Get();
                     return this;
                 default:
-                    ((ValueArray)Builder).Append(element.Get());
+                    ((ValuesArray)Builder).Append(element.Get());
                     return this;
             }
         }
@@ -610,7 +610,7 @@ internal class ParseTree
                     element.Get();
                     return From;
                 case OpenBrace:
-                    if (Operator.Text[0] != Equal)
+                    if (Operator[0] != Equal)
                     {
                         Exceptions.UnexpectedOperator(element);
                         element.Get();
@@ -624,7 +624,7 @@ internal class ParseTree
                     }
                 default:
                     Step = Steps.Value;
-                    Builder = new TaggedValue(From?.Builder, Name, Level, Operator, element.Get());
+                    Builder = new TagValues(From?.Builder, Name, Level, Operator, element.Get());
                     return this;
             }
         }
